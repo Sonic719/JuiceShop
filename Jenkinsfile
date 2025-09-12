@@ -25,7 +25,6 @@ pipeline {
 
         stage('Test') {
             steps {
-                // Прогон тестов (если есть)
                 bat 'npm test --passWithNoTests'
             }
         }
