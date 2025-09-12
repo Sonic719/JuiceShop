@@ -26,7 +26,7 @@ pipeline {
         stage('Test') {
             steps {
                 // Прогон тестов (если есть)
-                bat 'npm test || echo "No tests found"'
+                bat 'npm test --passWithNoTests'
             }
         }
     }
