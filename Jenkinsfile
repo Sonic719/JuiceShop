@@ -1,45 +1,39 @@
 pipeline {
     agent { label 'PT-AI-Agent' } // label твоего агента
-    environment {
-        NODEJS_HOME = '/usr/bin' // путь к Node.js, если нужно явно
-        PATH = "${env.NODEJS_HOME}:${env.PATH}"
-    }
+
     stages {
-        stage('Checkout SCM') {
+        stage('Checkout') {
+            agent { label 'master' } // билд на мастере
             steps {
-                git(
-                    url: 'https://github.com/Sonic719/JuiceShop.git',
-                    branch: 'main',
-                    credentialsId: 'jenkins-agent' // если нужен доступ
-                )
+                git url: 'https://github.com/Sonic719/JuiceShop.git', branch: 'main'
             }
         }
 
-        stage('Install dependencies') {
+        stage('Install & Build') {
+            agent { label 'master' }
             steps {
                 sh 'npm install'
-            }
-        }
-
-        stage('Build') {
-            steps {
                 sh 'npm run build'
             }
         }
 
-        stage('Test') {
+        stage('Send to PT AI') {
             steps {
-                sh 'npm test --passWithNoTests || echo "No tests found"'
+                // пример передачи на PT AI сервер
+                sh 'scp -r build/* jenkins@pt-ai-server:/path/to/check/'
+            }
+        }
+
+        stage('Run PT AI Check') {
+            steps {
+                // выполнить проверку на агенте
+                sh '/home/jenkins/pt-ai/run-check.sh /path/to/check/'
             }
         }
     }
 
     post {
-        success {
-            echo '✅ Build and tests completed successfully!'
-        }
-        failure {
-            echo '❌ Build failed! Check logs above.'
-        }
+        success { echo '✅ Build & PT AI check completed!' }
+        failure { echo '❌ Failed!' }
     }
 }
