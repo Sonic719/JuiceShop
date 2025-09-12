@@ -4,21 +4,18 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Берем код из репозитория
-                git branch: 'main', url: 'https://github.com/Sonic719/JuiceShop.git'
+                git url: 'https://github.com/Sonic719/JuiceShop.git', branch: 'main', credentialsId: 'jenkins-agent'
             }
         }
 
         stage('Install dependencies') {
             steps {
-                // Установка npm-зависимостей
                 bat 'npm install'
             }
         }
 
         stage('Build') {
             steps {
-                // Проверка сборки проекта
                 bat 'npm run build'
             }
         }
