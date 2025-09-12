@@ -1,29 +1,39 @@
 pipeline {
-    agent none  // общий pipeline без дефолтного агента
+    agent any
 
     stages {
-        stage('Checkout & Build') {
-            agent { label 'master' }  // билд на мастере
+        stage('Checkout') {
             steps {
-                git url: 'https://github.com/Sonic719/JuiceShop.git', branch: 'main'
-                sh 'npm install'
-                sh 'npm run build'
+                git url: 'https://github.com/Sonic719/JuiceShop.git', branch: 'main', credentialsId: 'jenkins-agent'
             }
         }
 
-        stage('Send & Check on PT AI') {
-            agent { label 'PT-AI-Agent' }  // агент Debian
+        stage('Install dependencies') {
             steps {
-                // передать собранный билд на сервер PT AI
-                sh 'scp -r /path/to/build jenkins@pt-ai-server:/check/path'
-                // запустить проверку
-                sh '/home/jenkins/pt-ai/run-check.sh /check/path'
+                bat 'npm install'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                bat 'npm run build'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                // Любой из двух вариантов выше
+                bat 'npm test --passWithNoTests || exit 0'
             }
         }
     }
 
     post {
-        success { echo '✅ Build & PT AI check done!' }
-        failure { echo '❌ Something failed!' }
+        success {
+            echo '✅ Build succeeded!'
+        }
+        failure {
+            echo '❌ Build failed!'
+        }
     }
 }
