@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent { label 'PT-AI-Agent'}
 
     stages {
         stage('Checkout') {
@@ -10,20 +10,20 @@ pipeline {
 
         stage('Install dependencies') {
             steps {
-                bat 'npm install'
+                sh 'npm install'
             }
         }
 
         stage('Build') {
             steps {
-                bat 'npm run build'
+                sh 'npm run build'
             }
         }
 
         stage('Test') {
             steps {
                 // Любой из двух вариантов выше
-                bat 'npm test --passWithNoTests || exit 0'
+                sh 'npm test --passWithNoTests || exit 0'
             }
         }
     }
